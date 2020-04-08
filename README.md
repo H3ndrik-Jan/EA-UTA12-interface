@@ -7,5 +7,5 @@ A PCB featuring an ESP32 reads the data from the UTA 12 interface and sends it t
 The data can be accessed through a web-page run on apache2. Also, settings can be set using the web-interface.
 I made this because I am a poor student who can't afford the original interface, sold by Elektro Automatik (https://elektroautomatik.com/shop/de/produkte/digitale-schnittstellen/usb-to-analog-uta12/412/uta-interface). 
 
-## How does it work
-I made a simple
+## Screenshot of interface
+![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/Screenshot.PNG)
