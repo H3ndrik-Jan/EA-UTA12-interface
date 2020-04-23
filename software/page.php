@@ -1,8 +1,15 @@
-    <!DOCTYPE html>
+  <!DOCTYPE html>
     <html>
     <head>
    <!-- <meta http-equiv="refresh" content="10" > -->
-    <?php $limit = 50;?>
+    <?php 
+	$limit = 0;
+	$setLimit = false;
+	$volSet = 0;
+	$setVol = false;
+	$curSet = 0;
+	$setCur = false;
+	?>
 
     <title>UTA-12 output</title>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
@@ -22,53 +29,115 @@
     color: white;
     }
     tr:nth-child(even) {background-color: #f2f2f2}
+
     </style>
+
+	<style type="text/css">
+    div {
+float: left;
+width:250px;
+}
+	</style>
+
 	</meta>
+	<h2>Settings menu</h2>
     </head>
 
     <body>
-	<form action="page.php" method="post">
-		# of results: <br>
-		<input type="text" name = "+1" value="50" />
+	<ul id="menu">
+	<div><form action="page.php" method="post">
+		<h3>Number of drawn results:</h3>
+		<input type="text" name = "+1" />
 	</form>
+</br>
 
-		<button type="button" id= "stdby" name = "standby">Standby</button> 
-		<button type="button" id= "extern" name = "external">External</button> 
+	<h3>Enable/disable:</h3>
+	<button type="button" id= "stdby" name = "standby">Standby</button> 
+	<button type="button" id= "extern" name = "external">External</button> </div>
 
+	<div>
+	<h3>Set voltage/current:</h3>
+	<form action="page.php" method="post">
+		<h5>Voltage:</h5>
+		<input type="text" name = "vols" value="0" />
+	</form>
+	<form action="page.php" method="post">
+		<h5>Current:</h5>
+		<input type="text" name = "curs" value="0" />	
+	</form>
+	</div>
 
+<div>
 
     <?php
 $voltage = array();
 $time = array();
 $current = array();
 	
-	if(isset($_POST['+1'])){
+if(isset($_POST['+1'])){
 $limit = $_POST['+1'];
+$setLimit = true;
+}
+if(isset($_REQUEST['vols'])){
+$volSet = $_REQUEST['vols'];
+$setVol = true;
+}
+if(isset($_REQUEST['curs'])){
+$curSet = $_REQUEST['curs'];
+$setCur = true;
 }
 
-
-    $conn = mysqli_connect("servername", "username", "password", "database");
-    // Check connection
+if($setVol == true){
+ $conn = mysqli_connect("servername", "username", "password", "database");
     if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
     }
+    $sql = "UPDATE settings SET vset= IF($volSet<=150.0, $volSet, 0) WHERE 1";	//max voltage is 150 volts
+$conn->query($sql);
+    $conn->close();
+}
+
+if($setCur == true){
+ $conn = mysqli_connect("servername", "username", "password", "database");
+    if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+    }
+    $sql = "UPDATE settings SET cset= IF($curSet<=4.0, $curSet, 0) WHERE 1";	//max current is 4 Ampere
+$conn->query($sql);
+    $conn->close();
+}
+
+    $conn = mysqli_connect("servername", "username", "password", "database");
+    if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+    }
+    if($setLimit == true)
+    {
+    $sql = "UPDATE settings SET res_num=$limit WHERE 1";
+$conn->query($sql);
+    }
+    $sql = "SELECT res_num FROM settings WHERE 1";
+    $result = $conn->query($sql);
+    $limit = $result->fetch_object()->res_num;
+    
+
     $sql = "SELECT num, voltage, current, recorded FROM log ORDER BY num DESC LIMIT $limit";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
     // output data of each row
 
     while($row = $result->fetch_assoc()) {
-$voltage[] = $row["voltage"];
-$time[] = $row["recorded"];
-$current[] = $row["current"];
+	$voltage[] = $row["voltage"];
+	$time[] = $row["recorded"];
+	$current[] = $row["current"];
     }
 
     } else { echo "0 results"; }
 
-echo "Last measured voltage: ". $voltage[0]. "V<br>";
+echo "<h5>Last measured voltage: </h5>". $voltage[0]. "V<br>";
  echo '<meter value ="'.$voltage[0].'" min = "0" max = "150">Voltage</meter><br>';
-echo "Last measured Current: ". $current[0]. "A<br>";
- echo '<meter value ="'.$current[0].'" min = "0" max = "4">Current</meter><br>';
+echo "<h5>Last measured Current: </h5>". $current[0]. "A<br>";
+ echo '<meter value ="'.$current[0].'" min = "0" max = "4">Current</meter><br></div></ul>';
     $conn->close();
     ?>
 
@@ -137,6 +206,7 @@ lineTension: 0.5
 
 });
 </script>
+
 
 <script>
 $(document).ready(function(){
