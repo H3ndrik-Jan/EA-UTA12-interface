@@ -230,7 +230,7 @@ void update_db(void)
 
 void initADC(void)
 {
-  // initialize SPI interface for MCP3208
+  // MCP3204 SPI initialization
   SPISettings settings(ADC_CLK, MSBFIRST, SPI_MODE0);
   SPI.begin();
   SPI.beginTransaction(settings);
