@@ -111,8 +111,8 @@ void loop()
     }
     else setcur = (sql_setc / 0.0145) - 6;
 
-    dacWrite(VOLDAC, setvol); //Variable output is disabled right now, so for safety reasons write 0 to the DAC
-    dacWrite(CURDAC, setcur); //Variable output is disabled right now, so for safety reasons write 0 to the DAC
+    dacWrite(VOLDAC, setvol);
+    dacWrite(CURDAC, setcur);
   }
 
   buttonState = digitalRead(button1);
