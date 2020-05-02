@@ -5,7 +5,7 @@
 
    Description:
     Connect your UTA12 port to the internet! This code lets the ESP32 send data to a MySQL database over WiFi,
-    and also reads settings for the power supply from this database.
+    and also reads settings for the power supply from this database. More information here: https://github.com/H3ndrik-Jan/EA-UTA12-interface
 */
 
 #include <Preferences.h>
@@ -20,14 +20,10 @@
 #include <WiFiClient.h>
 #include <WiFi.h>
 
-//ADC definitions:
-#define SPI_CS      2        // SPI slave select
-#define ADC_VREF    5000     // 3.3V Vref
-#define ADC_CLK     1600000  // SPI clock 1.6MHz
-#define CS_PIN 5
-#define CLOCK_PIN 18
-#define MOSI_PIN 23
-#define MISO_PIN 19
+//ADC (pin) definitions:
+#define ADC_VREF    5000     // Vref is 5 Volts
+#define ADC_CLK     1000000  // SPI clock 1MHz
+#define ADC_CS      5        // ADC CS is pin 5
 
 //Other pin definitions:
 #define SELP 33
@@ -35,7 +31,7 @@
 #define button1 4
 #define cvcc 17 //AKA TX2
 #define ovp 16 //AKA RX2
-#define otp 2
+#define otp 27
 #define VOLDAC 25
 #define CURDAC 26
 #define statLed 15
@@ -50,10 +46,6 @@ void update_db(void);
 void IRAM_ATTR onTimer();
 void initUpdateTimer(void);
 
-U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 22, /* data=*/ 21, /* reset=*/ U8X8_PIN_NONE);
-
-MCP3204 adc(ADC_VREF, CS_PIN);
-
 //Struct with all 'secret settings'. They're given by the user over the serial port
 typedef struct {
   char ssid[32];
@@ -63,24 +55,29 @@ typedef struct {
   IPAddress sql_ip;
 } creds_t;
 
-creds_t creds;
+U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 22, /* data=*/ 21, /* reset=*/ U8X8_PIN_NONE);
+MCP3204 adc(ADC_VREF, ADC_CS);
 Preferences prefs;
+WiFiClient client;
+creds_t creds;
 
+//Global variables
 int setvol = 0;
 int setcur = 0;
 double voltage;
 double current;
 bool sql_ext;
 bool sql_sta;
-float sql_setv;
-float sql_setc;
+double sql_setv;
+double sql_setc;
 int sql_updfreq;
 
-WiFiClient client;
+//flags
+bool updateDac;
+volatile bool dataUpdateTime = false;   //  Variable is used in ISR so needs to be declared volatile
+
 MySQL_Connection conn(&client);
 MySQL_Cursor* cursor;
-
-volatile bool dataUpdateTime = false;   //  Variable is used in ISR so needs to be declared volatile
 
 hw_timer_t * timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
@@ -100,9 +97,25 @@ void loop()
 {
   bool buttonState;
   static uint8_t connectionState = 0;
+  if (updateDac) {
+    updateDac = false;
+    if (sql_setv < 2.7 || sql_setv > 141.5)
+    {
+      setvol = 0;
+    }
+    else setvol = (sql_setv / 0.545) - 3.7;
 
-  dacWrite(VOLDAC, setvol); //Variable output is disabled right now, so for safety reasons write 0 to the DAC
-  dacWrite(CURDAC, setcur); //Variable output is disabled right now, so for safety reasons write 0 to the DAC
+    if (sql_setc < 0.072 || sql_setc > 3.773)
+    {
+      setcur = 0;
+    }
+    else setcur = (sql_setc / 0.0145) - 6;
+
+    dacWrite(VOLDAC, setvol); //Variable output is disabled right now, so for safety reasons write 0 to the DAC
+    Serial.print("Wrote to voltage DAC: "); Serial.println(setvol);
+    dacWrite(CURDAC, setcur); //Variable output is disabled right now, so for safety reasons write 0 to the DAC
+  }
+
   buttonState = digitalRead(button1);
 
   if (buttonState)
@@ -144,7 +157,7 @@ void loop()
     digitalWrite(statLed, 0);
     connectionState = 0;
   }
-  else  digitalWrite(statLed, 0);
+  else digitalWrite(statLed, 0);
 
   uint16_t adc1 = adc.read(MCP3204::Channel::SINGLE_0);
   uint16_t adc2 = adc.read(MCP3204::Channel::SINGLE_1);
@@ -226,11 +239,14 @@ void update_db(void)
   delete cur_mem;
   digitalWrite(SELP, sql_ext);
   digitalWrite(StandbyP, sql_sta);
+  updateDac = true;
 }
 
 void initADC(void)
 {
-  // MCP3204 SPI initialization
+  // initialize SPI interface for MCP3204
+  pinMode(ADC_CS, OUTPUT);
+  digitalWrite(ADC_CS, HIGH);
   SPISettings settings(ADC_CLK, MSBFIRST, SPI_MODE0);
   SPI.begin();
   SPI.beginTransaction(settings);
@@ -248,7 +264,6 @@ void initUpdateTimer(void)
 
 void setupPins(void)
 {
-  pinMode(CS_PIN, OUTPUT);
   pinMode(SELP, OUTPUT);
   pinMode(StandbyP, OUTPUT);
   pinMode(button1, INPUT_PULLUP);
@@ -258,7 +273,6 @@ void setupPins(void)
   pinMode(statLed, OUTPUT);
 
   // set initial output state
-  digitalWrite(CS_PIN, HIGH);
   digitalWrite(SELP, LOW);
   digitalWrite(StandbyP, LOW);
   digitalWrite(statLed, LOW);
@@ -278,15 +292,14 @@ void fetchCredentials(void)
   prefs.end();
 }
 
-void handleSerialInput(void) 
+void handleSerialInput(void)
 {
-  if (Serial.available() > 0) 
+  if (Serial.available() > 0)
   {
     static uint8_t settingState = 0;
 
     switch (settingState)
     {
-
       case 0: {
           String strSsid = Serial.readString(); //typecasting is neccesary
           strSsid.toCharArray(creds.ssid, strSsid.length() - 1);
@@ -353,7 +366,6 @@ void handleSerialInput(void)
         }
         break;
 
-
       case 5: {
           String strIP = Serial.readString();
           strIP.trim();
@@ -363,7 +375,7 @@ void handleSerialInput(void)
           prefs.end();
 
           settingState = 0;
-          Serial.print("Received the server IP as well ("); Serial.print(strIP); Serial.println(")."); 
+          Serial.print("Received the server IP as well ("); Serial.print(strIP); Serial.println(").");
           Serial.println("Everything is stored in the NVM. We are done.");
         }
         break;
