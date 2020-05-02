@@ -11,4 +11,4 @@ I made this because I am a poor student who can't afford the original interface,
 ## Photo of device
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/on.jpg)
 ## Screenshot of interface
-![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/software/Screenshot.PNG)
+![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/server/Screenshot.PNG)
