@@ -34,6 +34,7 @@ The web interface is basically a simple php script with a simple HTML lay-out. T
 
 ## Screenshot of the web-interface
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/server/Screenshot.PNG)
+![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/server/menu.PNG)
 
 ## More photos of the device
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/on.jpg)
