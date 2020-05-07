@@ -15,7 +15,7 @@ Look underneath for more pictures.
 There is an 15 pin analog interface available on numerous Elektro Automatik devices. The interface can be used to read all the things which can also be read on the frontpanel of the power supply. Additionally though, you can get a more precise voltage and current reading, as this allows for extra decimal numbers for the readings.
 Even more functionality of the interface can be found in that it can be used to set both voltage and current-limit, and can also put the power supply in standby mode, which will turn off the output of the power supply. This feature can't be controlled using the front panel.
 A schematic diagram of the internal connections, taken from the datasheet of the power supply, can be seen here:
-![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/Internal.jpg)
+![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/Internal.PNG)
 
 Reading and setting the voltage and current(-limit) of the power supply is done by reading or supplying a voltage varying from 0 to 10 volts. This voltage can be mapped to the output current and voltage of the power supply. The other outputs are open collector outputs, which are left 'floating' when not active, and are tied to ground when active. They can be pulled up by a high value resistor to easily read the state of the pin. The inputs can be set by tying the pins to GND, and are disabled when left floating.
 
@@ -33,8 +33,8 @@ The second table is 'settings'. This table has only one row, and is used to stor
 The web interface is basically a simple php script with a simple HTML lay-out. The power supplies settings can be set, and the update frequency and number of results on the chart can be set. Using Chart.js a line graph with the measured voltage and current is drawn. The webserver runs on apache2.
 
 ## Screenshot of the web-interface
-![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/server/Screenshot.PNG)
-![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/server/menu.PNG)
+![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/Screenshot.PNG)
+![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/menu.PNG)
 
 ## More photos of the device
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/on.jpg)
