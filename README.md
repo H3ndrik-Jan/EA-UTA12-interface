@@ -1,5 +1,5 @@
 # EA-UTA12-interface
-Make your own interface for Elektro Automatik power supplies using the UTA 12 interface port, and log data to a MySQL server.
+An DIY interface for Elektro Automatik power supplies using the UTA 12 interface port; Control/log your PSU with MySql!
 
 ## Overview
 This project is about an interface to the UTA 12 interface, found om Elektro Automatik power supplies.
@@ -19,7 +19,7 @@ A schematic diagram of the internal connections, taken from the datasheet of the
 
 Reading and setting the voltage and current(-limit) of the power supply is done by reading or supplying a voltage varying from 0 to 10 volts. This voltage can be mapped to the output current and voltage of the power supply. The other outputs are open collector outputs, which are left 'floating' when not active, and are tied to ground when active. They can be pulled up by a high value resistor to easily read the state of the pin. The inputs can be set by tying the pins to GND, and are disabled when left floating.
 
-I made a board based on the ESP-Wroom-32 to enable communicating with the power supply from other devices. The logging goes over wifi, so no connection with a computer is necessary. Power over USB is necessary. On the board is a USB-to-serial converter to communicate with the ESP32. There is a 12-bit ADC to read the analog inputs from the power supply. An dual opamp is used to amplify the output of the ESP32 internal 8 bit DAC to a 0-10 Volts. A -5V supply is available so the DAC can operate to 0 volts. The measurements are printed on a 0.96inch OLED display. Also, there is an LED on the board so the user can see if there is a connection with the SQL-database. A push button is used to turn the WiFi on and off. Network settings for the device, such as network SSID's and passwords, can be given over the serial port. The schematics can be found in this repository.
+I made a board based on the ESP-Wroom-32 to enable communicating with the power supply from other devices. The logging goes over wifi, so no connection with a computer is necessary. Power over USB is necessary. On the board is a USB-to-serial converter to communicate with the ESP32. There is a 12-bit ADC to read the analog inputs from the power supply. An opamp is used to amplify the output of the ESP32 internal 8 bit DAC to a 0-10 Volts. A -5V supply is available so the DAC can operate to 0 volts. The measurements are printed on a 0.96inch OLED display. Also, there is an LED on the board so the user can see if there is a connection with the SQL-database. A push button is used to turn the WiFi on and off. Network settings for the device, such as network SSID's and passwords, can be given over the serial port. The schematics can be found in this repository. The board basically consists of an ESP32 as the mcu, with an CH340G USB to UART bridge. The ADC is an MCP3204, which has good linearity which is obviously important in this case. The ADC is spoken to over SPI via an TXS0104 voltage level translator, as the ADC is powered with 5 volts. An TP2272 dual opamp is used to amplify the ESP32's internal DAC outputs to a maximum of 10 volts. The opamp is powered by the VCC bus provided by the UTA12, and -5 volts made with the USB 5 volt bus using an isolated DC-DC converter.
 
 The database and server hosting the web-interface for this project is installed on an Ubuntu virtual machine, running in Hyper-V. The virtual machine is running on my desktop pc. This is a good solution for me as I don't need the interface 24-7, and this enables me to quickly turn on and off the whole system. When I start the virtual machine, the web-interface and MySQL start automatically as well, and everything is up and running within seconds.
 
@@ -43,4 +43,4 @@ The web interface is basically a simple php script with a simple HTML lay-out. T
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/PCB.jpg)
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/Housing.jpg)
 
-
+Anyways while doing this project I learned a lot of things, because I never used MySql before, and also never really made a web interface with php, javascript and apache2 before. On the electronics side, it was very educational 'hacking' an interface of a professional device.
