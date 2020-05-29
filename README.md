@@ -46,3 +46,6 @@ The web interface is basically a simple php script with a simple HTML lay-out. T
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/Housing.jpg)
 
 Anyways while doing this project I learned a lot of things, because I never used MySql before, and also never really made a web interface with php, javascript and apache2 before. On the electronics side, it was very educational 'hacking' an interface of a professional device.
+
+## Disclaimer
+Obviously this is not an Elektro Automatik product. It was developed using all the datasheets Elektro Automatik provides online. If you would want to replicate it, do it on your own risk.
