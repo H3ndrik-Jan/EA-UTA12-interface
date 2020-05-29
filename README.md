@@ -9,9 +9,9 @@ A PCB featuring an ESP32 reads the data from the UTA 12 interface and sends it t
 
 The data can be accessed through a web-page run on apache2. A line graph made using chart.js shows the current and voltage. The amount of results can be set to the wished amount. Also, the power supply can be set in standby or external mode using the web interface.
 
-
+#### Look at the bottom for more pictures for more pictures
 ![alt text](https://github.com/H3ndrik-Jan/EA-UTA12-interface/blob/master/pictures/on.jpg)
-Look underneath for more pictures.
+
 
 ## Details
 There is an 15 pin analog interface available on numerous Elektro Automatik devices. The interface can be used to read all the things which can also be read on the frontpanel of the power supply. Additionally though, you can get a more precise voltage and current reading, as this allows for extra decimal numbers for the readings.
